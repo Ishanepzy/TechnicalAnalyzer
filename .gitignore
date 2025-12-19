@@ -23,6 +23,7 @@ TestResults/
 *.nupkg
 publish/
 out/
+Migrations/ 
 
 # Local databases / data files
 *.mdf
