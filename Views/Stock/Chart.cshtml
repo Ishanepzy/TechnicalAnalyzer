@@ -1,0 +1,154 @@
+﻿@model TechnicalAnalyzer.Models.StockDataModel  
+@using TechnicalAnalyzer.Models  
+<link rel="stylesheet" href="~/css/chart.css" />
+@{  
+    ViewData["Title"] = "Stock Chart";  
+    var sma = ViewBag.SMA as List<decimal?>;  
+    var smaPeriod = ViewBag.SMAPeriod as int?;  
+    var ema = ViewBag.EMA as List<decimal?>;  
+    var emaPeriod = ViewBag.EMAPeriod as int?;  
+    var rsi = ViewBag.RSI as List<decimal?>;  
+    var rsiPeriod = ViewBag.RSIPeriod as int?;  
+    var macdLine = ViewBag.MACDLine as List<decimal?>;  
+    var macdSignal = ViewBag.MACDSignal as List<decimal?>;  
+    var macdHistogram = ViewBag.MACDHistogram as List<decimal?>;  
+    var signals = ViewBag.Signals as List<TechnicalAnalyzer.Models.TradeSignalModel>;  
+    var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null };
+    var selectedRange = Context.Request.Query["candleRange"].ToString();
+}  
+
+<div style="max-width: 1100px; margin: 0 auto;">
+    <h2>@Model?.Ticker Stock Chart</h2>
+
+    <form method="get" asp-action="Chart" asp-controller="Stock" style="position: relative;">
+        <div style="position: relative;">
+            <input type="text" id="stockSearch" placeholder="Search for a stock..." autocomplete="off" style="width: 220px;" />
+            <ul id="stockResults"></ul>
+        </div>
+        <input type="hidden" name="ticker" value="@Model?.Ticker" />
+        <label for="candleRange" style="margin-left:20px;">Candle Time Range:</label>
+        <select id="candleRange" name="candleRange" style="margin-right:20px;">
+            <option value="60" selected="@(selectedRange == "60" ? "selected" : null)">1 Hour</option>
+            <option value="15" selected="@(selectedRange == "15" ? "selected" : null)">15 Minutes</option>
+            <option value="5" selected="@(selectedRange == "5" ? "selected" : null)">5 Minutes</option>
+            <option value="1" selected="@(selectedRange == "1" ? "selected" : null)">1 Minute</option>
+        </select>
+        <label for="smaPeriod">SMA Period:</label>
+        <input type="number" id="smaPeriod" name="smaPeriod" min="2" max="200" value="@(smaPeriod ?? 15)" />
+        <label for="emaPeriod" style="margin-left:20px;">EMA Period:</label>
+        <input type="number" id="emaPeriod" name="emaPeriod" min="2" max="200" value="@(emaPeriod ?? 7)" />
+        <label for="rsiPeriod" style="margin-left:20px;">RSI Period:</label>
+        <input type="number" id="rsiPeriod" name="rsiPeriod" min="2" max="50" value="@(rsiPeriod ?? 14)" />
+        <label for="showMacd" style="margin-left:20px;">Show MACD</label>
+        <input type="checkbox" id="showMacd" name="showMacd" value="true" @(macdLine != null ? "checked" : "") />
+        @* <label for="stopLoss" style="margin-left:20px;">Stop Loss (%)</label>
+        <input type="number" id="stopLoss" name="stopLoss" min="0" max="100" step="0.1" value="@(Context.Request.Query["stopLoss"].Count > 0 ? Context.Request.Query["stopLoss"] : 2)" />
+        <label for="takeProfit" style="margin-left:20px;">Take Profit (%)</label>
+        <input type="number" id="takeProfit" name="takeProfit" min="0" max="100" step="0.1" value="@(Context.Request.Query["takeProfit"].Count > 0 ? Context.Request.Query["takeProfit"] : 5)" /> *@
+        <button type="submit">Apply</button>
+    </form>
+
+    @if (Model != null && Model.DataPoints != null)
+    {
+        <div style="margin-bottom:10px;">
+            <button id="prevDayBtn">Previous</button>
+            <span id="currentDayLabel" style="margin:0 20px;"></span>
+            <button id="nextDayBtn">Next</button>
+        </div>
+        <canvas id="candlestickChart" width="900" height="400" style="margin-bottom:30px;"></canvas>
+        <canvas id="stockChart" width="900" height="400"></canvas>
+        <canvas id="rsiChart" width="900" height="400" style="margin-top:30px;"></canvas>
+        <canvas id="macdChart" width="900" height="200" style="margin-top:30px;"></canvas>
+
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+
+        <script src="~/js/stockChart.js"></script>
+        <script>
+            renderCandlestickChart(
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DataPoints, jsonOptions)),
+                @(sma != null ? @Html.Raw(System.Text.Json.JsonSerializer.Serialize(sma, jsonOptions)) : "null"),
+                @(smaPeriod ?? 0),
+                @(ema != null ? @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ema, jsonOptions)) : "null"),
+                @(emaPeriod ?? 0),
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(signals, jsonOptions)),
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(rsi, jsonOptions)),
+                @(rsiPeriod ?? 0),
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(macdLine, jsonOptions)),
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(macdSignal, jsonOptions)),
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(macdHistogram, jsonOptions))
+            );
+        </script>
+
+        @if (ViewBag.SignalFilterReport != null || ViewBag.KnnPrediction != null)
+        {
+            <div style="display:flex;gap:20px;flex-wrap:wrap;margin:25px 0;">
+                @if (ViewBag.SignalFilterReport != null)
+                {
+                    var report = ViewBag.SignalFilterReport;
+                    <div style="flex:1;min-width:240px;border:1px solid #ccc;padding:12px;border-radius:6px;">
+                        <h4 style="margin-top:0;">Random Forest Signal Filter</h4>
+                        <p><strong>Original signals:</strong> @report.OriginalSignals</p>
+                        <p><strong>Accepted:</strong> @report.AcceptedSignals</p>
+                        <p><strong>Rejected:</strong> @report.RejectedSignals</p>
+                        @if (report.AverageConfidence > 0)
+                        {
+                            <p><strong>Avg confidence:</strong> @(report.AverageConfidence.ToString("P1"))</p>
+                        }
+                        @if (report.Notes != null)
+                        {
+                            <ul>
+                                @foreach (string note in report.Notes)
+                                {
+                                    <li>@note</li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                }
+                @if (ViewBag.KnnPrediction != null)
+                {
+                    var knn = ViewBag.KnnPrediction;
+                    <div style="flex:1;min-width:240px;border:1px solid #ccc;padding:12px;border-radius:6px;">
+                        <h4 style="margin-top:0;">KNN Direction Insight</h4>
+                        <p><strong>Bias:</strong> @knn.Direction</p>
+                        <p><strong>Confidence:</strong> @(knn.Confidence.ToString("P1"))</p>
+                        <p style="font-size:0.95em;color:#555;">@knn.Explanation</p>
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div style="text-align:center; margin-top:40px;">
+            <p>No data available. Please search for a stock.</p>
+        </div>
+    }
+</div>
+
+@if (ViewBag.BacktestResults != null)
+{
+    var bt = ViewBag.BacktestResults;
+    <div style="margin-top:30px;">
+        <h4>Alerts</h4>
+        <ul style="max-height:200px;overflow:auto;">
+        @foreach (var alert in bt.AlertLog)
+        {
+            if (alert.Contains("Stop loss")) {
+                <li style="color:red;font-weight:bold;">@alert</li>
+            } else if (alert.Contains("Take profit")) {
+                <li style="color:green;font-weight:bold;">@alert</li>
+            } else {
+                <li>@alert</li>
+            }
+        }
+        </ul>
+    </div>
+}
+
+<script src="~/js/stockSearch.js"></script>

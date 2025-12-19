@@ -1,0 +1,48 @@
+﻿# Python-related files
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.env
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# .NET-related files
+bin/
+obj/
+*.user
+.vs/
+*.csproj.user
+TestResults/
+*.nupkg
+publish/
+out/
+
+# Local databases / data files
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs and backups
+*.log
+*.bak
+
+# IDE folders
+.idea/
+.vscode/
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml

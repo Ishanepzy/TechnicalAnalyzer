@@ -1,0 +1,77 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f8f9fa;
+}
+
+h2 {
+    margin-top: 20px;
+    color: #333;
+}
+
+form {
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+form label {
+    margin-right: 4px;
+    font-weight: 500;
+}
+
+form input[type="text"], form input[type="number"] {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 6px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-left: 12px;
+}
+
+form button:hover {
+    background: #0056b3;
+}
+
+#stockResults {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 0 0 4px 4px;
+    max-height: 180px;
+    overflow-y: auto;
+    width: 220px;
+    z-index: 10;
+    margin-top: 2px;
+    list-style: none;
+    padding: 0;
+}
+
+#stockResults li {
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+#stockResults li:hover {
+    background: #f1f1f1;
+}
+
+canvas {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 24px;
+}
