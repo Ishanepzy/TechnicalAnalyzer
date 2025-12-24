@@ -1,6 +1,6 @@
 # TechnicalAnalyzer
 
-TechnicalAnalyzer is a focused Razor Pages application for collecting, persisting, and analyzing NEPSE (Nepal Stock Exchange) market data. It provides interactive OHLC charts, a suite of technical indicators, and tooling to prototype and evaluate trading signals. The project is designed for research and experimentation — not financial advice.
+TechnicalAnalyzer is an application for collecting, persisting, and analyzing NEPSE (Nepal Stock Exchange) market data. It provides interactive OHLC charts, a suite of technical indicators, and tooling to prototype and evaluate trading signals. The project is designed for research and experimentation — not financial advice.
 
 ## Key features
 
